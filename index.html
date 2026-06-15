@@ -3,49 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Type Composer App v0.4 - Fixed</title>
+    <title>Type Composer Agent - UI Prototyper</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=DotGothic16&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=DotGothic16&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600&family=Rubik+Mono+One&display=swap" rel="stylesheet">
     
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
+        body { font-family: 'Inter', sans-serif; }
         .font-pixel { font-family: 'DotGothic16', sans-serif; }
         .font-serif-brutal { font-family: 'EB Garamond', serif; }
         .font-mono-brutal { font-family: 'Courier Prime', monospace; }
         .font-heavy { font-family: 'Rubik Mono One', sans-serif; }
 
-        /* Contenedor principal con límite de viewport */
-        .canvas-container {
-            max-height: 65vh;
-            max-width: 90vw;
+        /* Fondo de malla de puntos (Dot Grid) exacto al de la referencia */
+        .dot-grid {
+            background-size: 24px 24px;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+        }
+
+        /* Contenedor adaptativo para que mantenga el look de canvas */
+        .canvas-workspace {
+            position: relative;
             width: 100%;
-            margin: auto;
-            /* Habilitamos Container Queries para que el texto mida su espacio relativo al canvas */
-            container-type: inline-size; 
+            height: 100%;
+            overflow: hidden;
         }
 
-        /* Fuerza a que los bloques ocultos no generen saltos visuales antes de la animación */
-        .animated-block {
-            opacity: 0;
-            will-change: transform, opacity;
-        }
-    </style>
-</head>
-<body class="bg-[#f4f3ef] text-gray-900 h-screen flex flex-col font-mono-brutal overflow-hidden">
-
-    <header class="border-b-4 border-black p-4 bg-white grid grid-cols-1 md:grid-cols-4 gap-4 items-center shrink-0 z-50 shadow-md">
-        <div>
-            <h1 class="text-xl font-heavy tracking-tighter text-black">TYPE COMPOSER <span class="text-xs bg-black text-white p-1">v0.4</span></h1>
-            <p class="text-[10px] text-gray-500 mt-0.5">Fixed Container Scale Engine</p>
-        </div>
-
-        <div class="space-y-1">
-            <label class="block text-[10px] font-bold uppercase tracking-wider">Frase (3-6 palabras):</label>
-            <div class="flex gap-2">
-                <input type="text" id="phraseInput" 
-                       value="Regular Italic BOLD Light"
+        /* Pre
