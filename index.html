@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Type Composer App v0.3 - Animated</title>
+    <title>Type Composer App v0.4 - Fixed</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -18,15 +19,20 @@
         .font-mono-brutal { font-family: 'Courier Prime', monospace; }
         .font-heavy { font-family: 'Rubik Mono One', sans-serif; }
 
-        #canvas {
-            max-height: 70vh;
+        /* Contenedor principal con límite de viewport */
+        .canvas-container {
+            max-height: 65vh;
             max-width: 90vw;
+            width: 100%;
             margin: auto;
+            /* Habilitamos Container Queries para que el texto mida su espacio relativo al canvas */
+            container-type: inline-size; 
         }
 
-        /* Clase utilitaria para ocultar elementos antes de que GSAP los anime (evita parpadeos) */
+        /* Fuerza a que los bloques ocultos no generen saltos visuales antes de la animación */
         .animated-block {
             opacity: 0;
+            will-change: transform, opacity;
         }
     </style>
 </head>
@@ -34,24 +40,12 @@
 
     <header class="border-b-4 border-black p-4 bg-white grid grid-cols-1 md:grid-cols-4 gap-4 items-center shrink-0 z-50 shadow-md">
         <div>
-            <h1 class="text-xl font-heavy tracking-tighter text-black">TYPE COMPOSER <span class="text-xs bg-black text-white p-1">v0.3</span></h1>
-            <p class="text-[10px] text-gray-500 mt-0.5">Motion Graphics Engine (GSAP)</p>
+            <h1 class="text-xl font-heavy tracking-tighter text-black">TYPE COMPOSER <span class="text-xs bg-black text-white p-1">v0.4</span></h1>
+            <p class="text-[10px] text-gray-500 mt-0.5">Fixed Container Scale Engine</p>
         </div>
 
         <div class="space-y-1">
             <label class="block text-[10px] font-bold uppercase tracking-wider">Frase (3-6 palabras):</label>
             <div class="flex gap-2">
                 <input type="text" id="phraseInput" 
-                       value="Regular Italic BOLD Light" 
-                       class="w-full p-2 border-2 border-black focus:outline-none bg-white text-xs font-bold" />
-                <button onclick="generateLayout()" class="bg-black text-white px-3 py-1 text-xs font-bold active:translate-y-0.5 transition-transform border-b-2 border-r-2 border-gray-700 cursor-pointer">
-                    RE-ANIMAR
-                </button>
-            </div>
-            <p id="errorMessage" class="text-red-600 text-[10px] hidden font-bold">¡Error: 3 a 6 palabras máximo!</p>
-        </div>
-
-        <div class="flex flex-col space-y-1 md:items-center">
-            <span class="text-[10px] font-bold uppercase tracking-wider">Formato Canvas:</span>
-            <div class="inline-flex border-2 border-black bg-white p-1 gap-1">
-                <button onclick="setAspectRatio('16/
+                       value="Regular Italic BOLD Light"
