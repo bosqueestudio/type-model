@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Type Composer App v0.2</title>
+    <title>Type Composer App v0.3 - Animated</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=DotGothic16&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Rubik+Mono+One&display=swap" rel="stylesheet">
@@ -16,11 +18,15 @@
         .font-mono-brutal { font-family: 'Courier Prime', monospace; }
         .font-heavy { font-family: 'Rubik Mono One', sans-serif; }
 
-        /* Ajuste fino para asegurar escalado fluido y centrado perfecto */
         #canvas {
-            max-height: 70vh; /* Asegura que nunca desborde verticalmente el viewport */
-            max-width: 90vw;  /* Asegura que nunca desborde horizontalmente */
+            max-height: 70vh;
+            max-width: 90vw;
             margin: auto;
+        }
+
+        /* Clase utilitaria para ocultar elementos antes de que GSAP los anime (evita parpadeos) */
+        .animated-block {
+            opacity: 0;
         }
     </style>
 </head>
@@ -28,8 +34,8 @@
 
     <header class="border-b-4 border-black p-4 bg-white grid grid-cols-1 md:grid-cols-4 gap-4 items-center shrink-0 z-50 shadow-md">
         <div>
-            <h1 class="text-xl font-heavy tracking-tighter text-black">TYPE COMPOSER <span class="text-xs bg-black text-white p-1">v0.2</span></h1>
-            <p class="text-[10px] text-gray-500 mt-0.5">Responsive Layout & Scale Engine</p>
+            <h1 class="text-xl font-heavy tracking-tighter text-black">TYPE COMPOSER <span class="text-xs bg-black text-white p-1">v0.3</span></h1>
+            <p class="text-[10px] text-gray-500 mt-0.5">Motion Graphics Engine (GSAP)</p>
         </div>
 
         <div class="space-y-1">
@@ -39,7 +45,7 @@
                        value="Regular Italic BOLD Light" 
                        class="w-full p-2 border-2 border-black focus:outline-none bg-white text-xs font-bold" />
                 <button onclick="generateLayout()" class="bg-black text-white px-3 py-1 text-xs font-bold active:translate-y-0.5 transition-transform border-b-2 border-r-2 border-gray-700 cursor-pointer">
-                    RENDER
+                    RE-ANIMAR
                 </button>
             </div>
             <p id="errorMessage" class="text-red-600 text-[10px] hidden font-bold">¡Error: 3 a 6 palabras máximo!</p>
@@ -48,135 +54,4 @@
         <div class="flex flex-col space-y-1 md:items-center">
             <span class="text-[10px] font-bold uppercase tracking-wider">Formato Canvas:</span>
             <div class="inline-flex border-2 border-black bg-white p-1 gap-1">
-                <button onclick="setAspectRatio('16/9')" id="ratio-16-9" class="px-3 py-1 text-xs font-bold bg-black text-white cursor-pointer transition-colors">
-                    16:9
-                </button>
-                <button onclick="setAspectRatio('3/4')" id="ratio-3-4" class="px-3 py-1 text-xs font-bold text-black hover:bg-gray-200 cursor-pointer transition-colors">
-                    3:4
-                </button>
-            </div>
-        </div>
-
-        <div class="flex flex-col space-y-1 md:items-end">
-            <label for="textScale" class="text-[10px] font-bold uppercase tracking-wider">Escala Texto (<span id="scaleVal">60</span>%):</label>
-            <input type="range" id="textScale" min="20" max="95" value="60" 
-                   class="w-full md:w-32 accent-black cursor-pointer" 
-                   oninput="updateTextScale(this.value)">
-        </div>
-    </header>
-
-    <main class="flex-1 bg-[#dcdbd7] p-6 flex items-center justify-center overflow-hidden">
-        
-        <div id="canvas" 
-             class="bg-[#90b4c4] border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] relative transition-all duration-300 flex items-center justify-center aspect-[16/9] w-full">
-            
-            <div id="blocksWrapper" class="absolute inset-0 p-8 flex flex-col justify-center items-start space-y-4 w-full h-full box-border">
-                </div>
-
-            <div class="absolute bottom-4 right-6 w-32 h-32 opacity-15 pointer-events-none font-pixel text-8xl text-black select-none leading-none text-right">
-                [1]
-            </div>
-        </div>
-    </main>
-
-    <footer class="border-t-2 border-black bg-white p-1.5 text-[10px] flex justify-between shrink-0">
-        <span>Canvas Engine: Active (Fit Mode)</span>
-        <span>Grid: Fluid Cascade</span>
-    </footer>
-
-    <script>
-        // Set de fuentes tipográficas dinámicas
-        const textStyles = [
-            { font: 'font-serif-brutal font-normal', name: 'Regular Serif' },
-            { font: 'font-serif-brutal italic', name: 'Italic Serif' },
-            { font: 'font-pixel uppercase font-bold tracking-tight', name: 'Bold Pixel' },
-            { font: 'font-mono-brutal font-light', name: 'Light Mono' }
-        ];
-
-        let currentRatio = '16/9';
-        let currentScale = 60; // Porcentaje por defecto relativo al contenedor
-
-        // Controlar Aspect Ratio sin romper ni deformar el contenedor interior
-        function setAspectRatio(ratio) {
-            const canvas = document.getElementById('canvas');
-            const btn169 = document.getElementById('ratio-16-9');
-            const btn34 = document.getElementById('ratio-3-4');
-            currentRatio = ratio;
-
-            if (ratio === '16/9') {
-                canvas.style.aspectRatio = '16 / 9';
-                btn169.className = "px-3 py-1 text-xs font-bold bg-black text-white cursor-pointer";
-                btn34.className = "px-3 py-1 text-xs font-bold text-black hover:bg-gray-200 cursor-pointer";
-            } else {
-                canvas.style.aspectRatio = '3 / 4';
-                btn34.className = "px-3 py-1 text-xs font-bold bg-black text-white cursor-pointer";
-                btn169.className = "px-3 py-1 text-xs font-bold text-black hover:bg-gray-200 cursor-pointer";
-            }
-            
-            // Re-renderizar para ajustar los cálculos tipográficos al nuevo contenedor
-            generateLayout();
-        }
-
-        // Actualizar escala en tiempo real desde el Slider
-        function updateTextScale(val) {
-            currentScale = val;
-            document.getElementById('scaleVal').innerText = val;
-            
-            // Modifica dinámicamente el tamaño de la tipografía base en los bloques
-            const blocks = document.querySelectorAll('.word-block-text');
-            blocks.forEach(block => {
-                // Usamos unidades fluidas (cqw / vh combinado) para la escala perfecta
-                block.style.fontSize = `${currentScale * 0.12}vw`;
-            });
-        }
-
-        // Renderizador de la composición en niveles cascada
-        function generateLayout() {
-            const input = document.getElementById('phraseInput').value.trim();
-            const errorMsg = document.getElementById('errorMessage');
-            const wrapper = document.getElementById('blocksWrapper');
-            
-            const words = input.split(/\s+/).filter(word => word.length > 0);
-
-            if (words.length < 3 || words.length > 6) {
-                errorMsg.classList.remove('hidden');
-                return;
-            }
-            errorMsg.classList.add('hidden');
-            wrapper.innerHTML = ''; 
-
-            words.forEach((word, index) => {
-                const block = document.createElement('div');
-                
-                // Estilos estructurales del repositorio de color (Terracota #e05a47)
-                block.className = "bg-[#e05a47] border-2 md:border-4 border-black text-black inline-block px-4 py-1.5 relative shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] select-none transition-all duration-200";
-                
-                // Desplazamiento de niveles (Cascada controlada sin salirse del área segura)
-                const leftOffset = index * (60 / words.length); 
-                block.style.transform = `translateX(${leftOffset}%)`;
-                block.style.zIndex = index + 10;
-
-                // Estilo tipográfico alterno
-                const styleConfig = textStyles[index % textStyles.length];
-                
-                // Ajustamos el tamaño dinámico del texto basado en el slider actual
-                const dynamicFontSize = `${currentScale * 0.12}vw`;
-
-                block.innerHTML = `
-                    <span class="word-block-text ${styleConfig.font} block leading-none" style="font-size: ${dynamicFontSize};">
-                        ${word}
-                    </span>`;
-                
-                wrapper.appendChild(block);
-            });
-        }
-
-        // Init al cargar
-        window.onload = function() {
-            generateLayout();
-            // Escuchar el resize de pantalla para re-calcular y evitar deformaciones en vivo
-            window.addEventListener('resize', generateLayout);
-        };
-    </script>
-</body>
-</html>
+                <button onclick="setAspectRatio('16/
